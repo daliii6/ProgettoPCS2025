@@ -10,14 +10,16 @@
 using namespace std;
 using namespace Eigen;
 
-namespace PolygonalLibrary {
+namespace PolyhedronLibrary {
 
-struct PolygonalMesh
+struct PolyhedronMesh
 {
     // Numero di celle di ogni tipo
     unsigned int NumCell0Ds;
     unsigned int NumCell1Ds;
     unsigned int NumCell2Ds;
+    unsigned int NumCell3Ds;
+	
 
     // Identificativi delle celle
     vector<unsigned int> Cell0DsId; ///< Cell0D id, size 1 x NumberCell0D

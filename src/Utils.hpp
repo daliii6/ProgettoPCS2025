@@ -1,16 +1,16 @@
 #pragma once
 
 #include <iostream>
-#include "PolygonalMesh.hpp"
+#include "PolyhedronMesh.hpp"
 
 using namespace std;
 
-namespace PolygonalLibrary
+namespace PolyhedronLibrary
 {
 /// Import the polygonal mesh and test if the mesh is correct
 /// mesh: a PolygonalMesh struct
 /// return the result of the reading, true if is success, false otherwise
-bool ImportMesh(PolygonalMesh& mesh);
+bool ImportPolyhedronMesh(const unsigned int &p, const unsigned int &q, Polyhedron &P);
 
 /// Import the Cell0D properties from Cell0Ds.csv file
 /// mesh: a PolygonalMesh struct
@@ -26,5 +26,13 @@ bool ImportCell1Ds(PolygonalMesh& mesh);
 /// mesh: a PolygonalMesh struct
 /// return the result of the reading, true if is success, false otherwise
 bool ImportCell2Ds(PolygonalMesh& mesh);
+
+/*Function to export the polyhedron properties and it will create 4 files: Cell0Ds.txt, Cell1Ds.txt, Cell2Ds.txt, Cell3Ds.txt
+P: a Polyhedron struct */
+void Export_polyhedron(Polyhedron &P);
+
+/*Function to visulaize every properties of a input Polyhedron struct
+P: a Polyhedron struct*/
+void Visualize_polyhedron(Polyhedron &P);
 
 }
