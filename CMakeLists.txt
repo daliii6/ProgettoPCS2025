@@ -63,12 +63,14 @@ add_executable(${PROJECT_NAME}
       ${${PROJECT_NAME}_SOURCES}
       ${${PROJECT_NAME}_HEADERS})
 
-set(POLYHEDRON_TYPES "tetrahedron" "cube" "octahedron" "icosahedron" "dodecahedron")
+# Copy entire folders for each solid type
+set(POLYHEDRON_TYPES "Ottaedro" "Icosaedro" "Tetraedro")
 
 foreach(poly_type ${POLYHEDRON_TYPES})
-    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Platonic_solids/${poly_type}.txt  
-      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/SolidiPlatonici/${poly_type}
+         DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/SolidiPlatonici)
 endforeach()
+
 
 target_link_libraries(${PROJECT_NAME} ${ProgettoPCS2025_LINKED_LIBRARIES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${ProgettoPCS2025_INCLUDE})

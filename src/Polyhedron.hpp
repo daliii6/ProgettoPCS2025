@@ -1,5 +1,4 @@
 #pragma once
-
 #include <iostream>
 #include <vector>
 #include <array>
@@ -26,6 +25,7 @@ struct PolyhedronMesh
     vector<unsigned int> Cell1DsId; ///< Cell1D id, size 1 x NumberCell1D
     vector<unsigned int> Cell2DsId; ///< Cell2D id, size 1 x NumberCell2D
 
+
     // Coordinate dei punti (Cell0D)
     Eigen::MatrixXd Cell0DsCoordinates; // uso matrici per le funzioni di export di Vicini
 
@@ -37,10 +37,6 @@ struct PolyhedronMesh
 
     // Lati dei poligoni (Cell2D)
     vector<vector<unsigned int>> Cell2DsEdges; ///< Cell2D Cell1D indices, size 1 x NumberCell2DEdges[NumberCell2D]
-
-    // Marker associati alle celle: mappa da marker a lista di ID
-    map<unsigned int, list<unsigned int>> Cell0DMarkers; ///< Cell0D markers
-	map<unsigned int, list<unsigned int>> Cell1DMarkers; ///< Cell1D properties
 
 };
 
