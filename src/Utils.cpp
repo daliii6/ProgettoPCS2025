@@ -44,8 +44,8 @@ bool ImportCell0Ds(PolyhedronMesh& polyhedron, const string& InputFileDirectory)
         replace(line.begin(), line.end(), ';', ' ');
         istringstream converter(line);
 
-        unsigned int id, marker;
-        converter >> id >> marker
+        unsigned int id;
+        converter >> id
                   >> polyhedron.Cell0DsCoordinates(0, id)
                   >> polyhedron.Cell0DsCoordinates(1, id)
                   >> polyhedron.Cell0DsCoordinates(2, id);
@@ -79,8 +79,8 @@ bool ImportCell1Ds(PolyhedronMesh& polyhedron, const string& InputFileDirectory)
         replace(line.begin(), line.end(), ';', ' ');
         istringstream converter(line);
 
-        unsigned int id, marker;
-        converter >> id >> marker >> polyhedron.Cell1DsExtrema(0, id) >> polyhedron.Cell1DsExtrema(1, id);
+        unsigned int id;
+        converter >> id >> polyhedron.Cell1DsExtrema(0, id) >> polyhedron.Cell1DsExtrema(1, id);
         polyhedron.Cell1DsId.push_back(id);
     }
 
@@ -112,8 +112,8 @@ bool ImportCell2Ds(PolyhedronMesh& polyhedron, const string& InputFileDirectory)
         replace(line.begin(), line.end(), ';', ' ');
         istringstream converter(line);
 
-        unsigned int id, marker, numVertices, numEdges;
-        converter >> id >> marker >> numVertices;
+        unsigned int id, numVertices, numEdges;
+        converter >> id >> numVertices;
 
         vector<unsigned int> vertices(numVertices);
         for (unsigned int i = 0; i < numVertices; i++) converter >> vertices[i];
@@ -172,13 +172,6 @@ vector<list<pair<unsigned int, double>>> ListaAdiacenza(PolyhedronMesh& mesh)
         LA[id_v1].push_back(arco1);
         LA[id_v2].push_back(arco2);  
     }
-    for (size_t i = 0; i < LA.size(); i++)
-	{
-		cout << "Vertice " << i << " è adiacente a:\n";
-		for (const auto& arco : LA[i]) {
-			cout << "  → " << arco.first << " con lunghezza " << arco.second << "\n";
-		}
-	}
 
     return LA;
 	
@@ -231,13 +224,7 @@ vector<unsigned int> DijkstraCamminoMinimo(const vector<list<pair<unsigned int, 
     for (int v = id_end; v != -1; v = predecessori[v])
         cammino.push_back(v);
 
-    reverse(cammino.begin(), cammino.end());
-	for (size_t i = 0; i < cammino.size(); ++i) 
-	{
-		
-		std::cout << "id "<<cammino[i] << "\n";
-	}		
-	
+    reverse(cammino.begin(), cammino.end());	
     return cammino;
 }
 // prendo lati cammino minimo	
@@ -379,12 +366,6 @@ bool TriangolaClasseI(int b,
                 }
             }
         }
-		std::cout << "Iterazione " << f << ":\n";
-		for (size_t i = 0; i < nuovi_vertici.size(); ++i) 
-		{
-			const Vector3d& v = nuovi_vertici[i];
-			std::cout << "Vertice " << i << ": (" << v.x() << ", " << v.y() << ", " << v.z() << ")\n";
-		}
     }
 
     // popolo il Cell0Ds
@@ -728,22 +709,9 @@ bool TriangolaClasseII(int b_input,
                 }
 				
             }
-			std::cout<<"nuovi punti"<<it<<"\n";
-			std::cout<<"nuovi facce laterali"<<it_facce_lat<<"\n";
-			std::cout<<"esagoni"<<it_esa<<"\n";
-			std::cout<<"numero tri es"<<it_es_tri<<"\n";
         }
-		std::cout << "Iterazione " << f << ":\n";
-		for (size_t i = 0; i < nuovi_vertici.size(); ++i) 
-		{
-			const Vector3d& v = nuovi_vertici[i];
-			std::cout << "Vertice " << i << ": (" << v.x() << ", " << v.y() << ", " << v.z() << ")\n";
-		}
-		
-		 
-		
-
     }
+    
 	// popolo il Cell0Ds
 	mesh_output.NumCell0Ds = nuovi_vertici.size();
 	mesh_output.Cell0DsCoordinates = MatrixXd(3, nuovi_vertici.size());
@@ -974,11 +942,6 @@ bool CostruisciDualMesh(const PolyhedronMesh& StartPolyhedron, PolyhedronMesh& D
     }
     return true;
 }
-
-
-
-
-
 
 
 
