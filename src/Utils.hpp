@@ -57,6 +57,7 @@ void GeneraEsagono(
     int id_1, int id_2, int id_3, int id_4, int id_5, int id_6,
     int& id_b_low, int& it_es_tri);
 
+vector<int> OrdinaFacceAttornoAlVertice(int vertex_id, const PolyhedronMesh& mesh);
 
 bool CostruisciDualMesh(const PolyhedronMesh& StartPolyhedron, PolyhedronMesh& DualPolyhedron);
 }
