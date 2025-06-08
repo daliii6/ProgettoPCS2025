@@ -34,13 +34,13 @@ vector<unsigned int> latiCamminoMinimo(PolyhedronMesh& polyhedron,vector<unsigne
 
 
 // Triangolazione geodetica classe I
-bool TriangolaClasseI(int p, int q, int b,
+bool TriangolaClasseI(int b,
                       const PolyhedronMesh& mesh_input,
-                      PolyhedronMesh& mesh_output,int c);
+                      PolyhedronMesh& mesh_output);
 					  // Triangolazione geodetica classe I
-bool TriangolaClasseII(int p, int q, int b_input,
+bool TriangolaClasseII(int b_input,
                       const PolyhedronMesh& mesh_input,
-                      PolyhedronMesh& mesh_output,int c_input);
+                      PolyhedronMesh& mesh_output);
 
 // Esportazione dei file .txt
 bool EsportaMeshSuFile(const PolyhedronMesh& mesh, const std::string& outputDirectory);
@@ -49,11 +49,11 @@ bool EsportaMeshSuFile(const PolyhedronMesh& mesh, const std::string& outputDire
 int TrovaVertice(const Eigen::Vector3d& v, const std::vector<Eigen::Vector3d>& lista, double toll = 1e-8);
 //funzione che mi genera esagoni da cui prendo facce per triangolazione b=c_input
 void GeneraEsagono(
-    const std::vector<Vector3d>& nuovi_vertici,
+    const std::vector<Vector3d>& /*nuovi_vertici*/,
     std::vector<std::vector<int>>& nuove_facce,
     int id_1, int id_2, int id_3, int id_4, int id_5, int id_6,
-    int& id_baricentro,
-    std::vector<Vector3d>& vertici_out);
+    int& id_b_low, int& it_es_tri);
 
-    bool CostruisciDualMesh(const PolyhedronMesh& StartPolyhedron, PolyhedronMesh& DualPolyhedron);
+
+bool CostruisciDualMesh(const PolyhedronMesh& StartPolyhedron, PolyhedronMesh& DualPolyhedron);
 }

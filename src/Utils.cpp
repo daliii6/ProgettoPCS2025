@@ -172,7 +172,7 @@ vector<list<pair<unsigned int, double>>> ListaAdiacenza(PolyhedronMesh& mesh)
         LA[id_v1].push_back(arco1);
         LA[id_v2].push_back(arco2);  
     }
-    for (int i = 0; i < LA.size(); i++) 
+    for (size_t i = 0; i < LA.size(); i++)
 	{
 		cout << "Vertice " << i << " è adiacente a:\n";
 		for (const auto& arco : LA[i]) {
@@ -255,8 +255,8 @@ vector<unsigned int> latiCamminoMinimo(PolyhedronMesh& polyhedron,vector<unsigne
 		unsigned int vertice_id_second=cammino[i+1];
 		for (unsigned int j=0;j<n;j++)
 		{
-			if((estremi(0,j) == vertice_id_first && estremi(1,j) == vertice_id_second) ||
-    (estremi(0,j) == vertice_id_second && estremi(1,j) == vertice_id_first))
+			if((static_cast<unsigned int>(estremi(0,j)) == vertice_id_first && static_cast<unsigned int>(estremi(1,j)) == vertice_id_second) ||
+   (static_cast<unsigned int>(estremi(0,j)) == vertice_id_second && static_cast<unsigned int>(estremi(1,j)) == vertice_id_first))    //perche static cast????
 			{
 				 if (std::find(lati.begin(), lati.end(), j) == lati.end())
 				 {
@@ -289,9 +289,9 @@ Costruisce facce triangolari locali (nuove_facce) b^2(CREDO)
 Costruisce tutti gli spigoli univoci
 Assegna ID a vertici, spigoli e facce
 Riempie le strutture di mesh_output*/
-bool TriangolaClasseI(int p, int q, int b,
+bool TriangolaClasseI(int b,
                       const PolyhedronMesh& mesh_input,
-                      PolyhedronMesh& mesh_output, int c)
+                      PolyhedronMesh& mesh_output)
 {
 	/* //Enrico: ho fatto i due casi dove uno tra b,c in input è zero e ho definito b,c compatibilmente
 	if (b_input==0 && c_input>=1)
@@ -455,57 +455,31 @@ bool TriangolaClasseI(int p, int q, int b,
 }
 
 
-//funzione che da esagono mi prede facce triangolari
+//funzione che da esagono mi prende facce triangolari
 void GeneraEsagono(
-    const std::vector<Vector3d>& nuovi_vertici,
+    const std::vector<Vector3d>& /*nuovi_vertici*/,
     std::vector<std::vector<int>>& nuove_facce,
     int id_1, int id_2, int id_3, int id_4, int id_5, int id_6,
-    int& id_b_low,int& it_es_tri)
- {
-    // Calcolo del baricentro
-    /* Vector3d bar = (
-        nuovi_vertici[id_1] + nuovi_vertici[id_2] +
-        nuovi_vertici[id_3] + nuovi_vertici[id_4] +
-        nuovi_vertici[id_5] + nuovi_vertici[id_6]
-    ) / 6.0;
-    bar.normalize();
-
-    // Verifica se esiste già, altrimenti aggiungi
-    id_baricentro = TrovaVertice(bar, vertici_out);
-    if (id_b_low == -1) {
-        id_b_low = vertici_out.size();
-        vertici_out.push_back(bar);
-    } */
-
-    // Crea le 6 facce triangolari dell’esagono
+    int& id_b_low, int& it_es_tri)
+{
     nuove_facce.push_back({id_1, id_2, id_b_low});
     nuove_facce.push_back({id_2, id_3, id_b_low});
     nuove_facce.push_back({id_3, id_4, id_b_low});
     nuove_facce.push_back({id_4, id_5, id_b_low});
     nuove_facce.push_back({id_5, id_6, id_b_low});
     nuove_facce.push_back({id_6, id_1, id_b_low});
-	it_es_tri=it_es_tri+6;
+    it_es_tri = it_es_tri + 6;
 }
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-bool TriangolaClasseII(int p, int q, int b_input,
+bool TriangolaClasseII(int b_input,
                       const PolyhedronMesh& mesh_input,
-                      PolyhedronMesh& mesh_output, int c_input)
+                      PolyhedronMesh& mesh_output)
 {
     int b = b_input;
-    int c = c_input;
 
     std::vector<Vector3d> nuovi_vertici;
     std::vector<std::vector<int>> nuove_facce;
@@ -674,7 +648,7 @@ bool TriangolaClasseII(int p, int q, int b_input,
                         Vector3d d1 = nuovi_vertici[id_d1];
                         Vector3d d2 = nuovi_vertici[id_d2];
                         Vector3d d3 = nuovi_vertici[id_d3]; */
-					if(a<b-1 && m+1 < index_grid[a+1].size())
+                    if (a < b - 1 && m + 1 < static_cast<int>(index_grid[a + 1].size()))
 					{
 						it +=1;
 						int id_d3 = index_grid[a+1][m+1];
@@ -721,7 +695,8 @@ bool TriangolaClasseII(int p, int q, int b_input,
 						int id_5=id_bar_up_next_next;
 						int id_6=id_p3;
 						
-						int id_bar_esagono;
+						//
+                        // int id_bar_esagono;
 						Vector3d b_low = ((p2 +p3+p3_next) / 3.0).normalized();
 						
 						int id_b_low = TrovaVertice(b_low, nuovi_vertici);
@@ -888,9 +863,9 @@ std::vector<int> OrdinaFacceAttornoAlVertice(int vertex_id, const PolyhedronMesh
 
 bool CostruisciDualMesh(const PolyhedronMesh& StartPolyhedron, PolyhedronMesh& DualPolyhedron)
 {
-    int baricenter_id = 0;
-    int edge_id = 0;
-    int face_id = 0;
+    // int baricenter_id = 0;
+    // int edge_id = 0;
+    // int face_id = 0;
 
     std::vector<Vector3d> nuovi_vertici;
     std::vector<std::vector<int>> nuove_facce;

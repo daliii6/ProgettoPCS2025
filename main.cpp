@@ -75,9 +75,9 @@ PolyhedronMesh geodesic_mesh;
 	bool flag=true;
     if ((b == 0 && c > 0) || (c == 0 && b > 0)) {
         int param = std::max(b, c);  // usare il parametro diverso da zero
-        success = TriangolaClasseI(p, q, param, base_mesh, geodesic_mesh, 0);
+        success = TriangolaClasseI(param, base_mesh, geodesic_mesh);
     } else if (b == c && b >= 1) {
-        success = TriangolaClasseII(p, q, b, base_mesh, geodesic_mesh, c);
+        success = TriangolaClasseII(b, base_mesh, geodesic_mesh);
     } else {
         cerr << "Errore: valori di b e c non validi. Permessi: (b > 0, c = 0), (b = 0, c > 0), (b = c >= 1).\n";
 		flag=false;
