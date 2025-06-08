@@ -63,16 +63,15 @@ int main()
         return 1;
     }
 
-    string path = "SolidiPlatonici/" + name;
+    string path = "../SolidiPlatonici/" + name;
     PolyhedronMesh base_mesh;
     if (!ImportPolyhedronMesh(base_mesh, path)) {
         cerr << "Errore: file non trovato in " << path << endl;
         return 1;
     }
 
-PolyhedronMesh geodesic_mesh;
+    PolyhedronMesh geodesic_mesh;
     bool success = false;
-	bool flag=true;
     if ((b == 0 && c > 0) || (c == 0 && b > 0)) {
         int param = std::max(b, c);  // usare il parametro diverso da zero
         success = TriangolaClasseI(param, base_mesh, geodesic_mesh);
@@ -80,7 +79,6 @@ PolyhedronMesh geodesic_mesh;
         success = TriangolaClasseII(b, base_mesh, geodesic_mesh);
     } else {
         cerr << "Errore: valori di b e c non validi. Permessi: (b > 0, c = 0), (b = 0, c > 0), (b = c >= 1).\n";
-		flag=false;
         return 1;
     }
 
@@ -89,40 +87,38 @@ PolyhedronMesh geodesic_mesh;
         cerr << "Errore nella triangolazione classe I.\n";
         return 1;
     }
-	if(flag)
-	{
-		int n=geodesic_mesh.NumCell0Ds;
-		vector<list<pair<unsigned int, double>>> LA_geo=ListaAdiacenza(geodesic_mesh);
-		//cammino minimo
-		unsigned int id_start,id_end;
-		cout<<" id compreso tra 0 e "<<n-1<<endl;
-		cout<<"Inserisci id start e id fine";
-		cin>>id_start>>id_end;
-		if (id_start>=0 && id_end<n)
-		{
-			vector<int> predecessori;
-			double lunghezzaTotale;
-			vector<unsigned int> cammino=DijkstraCamminoMinimo(LA_geo,id_start,id_end, lunghezzaTotale,predecessori);
-			vector<unsigned int> lati=latiCamminoMinimo(geodesic_mesh,cammino);
-		}
-		else{
-			cout<<"Errore numero vertici"<<endl;
-		}
-		
-	}
-
-
     string outputDir = "OutputGeodetico/" + name + "_b=" + to_string(b) + "_c=" + to_string(c);
+
     if (!EsportaMeshSuFile(geodesic_mesh, outputDir)) {
         cerr << "Errore nell'esportazione dei file di output.\n";
         return 1;
     }
 
-    EsportaUCD(geodesic_mesh, outputDir);
+    unsigned int id_start, id_end;
+    unsigned int n = geodesic_mesh.NumCell0Ds;
+    cout << "id compreso tra 0 e " << n - 1 << endl;
+    cout << "Inserisci id start e id fine: ";
+    cin >> id_start >> id_end;
 
-    cout << "Triangolazione completata. File esportati in: " << outputDir << endl;
-    
-     PolyhedronMesh dual_mesh;
+    if (id_start < n && id_end < n)
+    {
+        vector<list<pair<unsigned int, double>>> LA_geo = ListaAdiacenza(geodesic_mesh);
+        vector<int> predecessori;
+        double lunghezzaTotale;
+        vector<unsigned int> cammino = DijkstraCamminoMinimo(LA_geo, id_start, id_end, lunghezzaTotale, predecessori);
+        vector<unsigned int> lati = latiCamminoMinimo(geodesic_mesh, cammino, outputDir);
+
+        cout << "Lunghezza totale cammino: " << lunghezzaTotale << "\n";
+        cout << "Numero lati: " << lati.size() << "\n";
+    }
+    else
+    {
+        cout << "Errore: vertici fuori dal range. File UCD neutri verranno generati.\n";
+        EsportaUCD(geodesic_mesh, outputDir);
+    }
+
+    // Calcolo e esportazione del duale
+    PolyhedronMesh dual_mesh;
     if (!CostruisciDualMesh(geodesic_mesh, dual_mesh)) {
         cerr << "Errore nella costruzione del duale.\n";
         return 1;
@@ -137,4 +133,5 @@ PolyhedronMesh geodesic_mesh;
     EsportaUCD(dual_mesh, dualOutputDir);
     cout << "Costruzione del duale completata. File esportati in: " << dualOutputDir << endl;
     return 0;
+
 }

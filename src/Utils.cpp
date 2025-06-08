@@ -13,6 +13,9 @@
 #include <algorithm>
 
 #include <limits>
+#include "UCDUtilities.hpp"
+using namespace Gedim;
+
 
 using namespace std;
 using namespace Eigen;
@@ -241,42 +244,56 @@ vector<unsigned int> DijkstraCamminoMinimo(const vector<list<pair<unsigned int, 
     return cammino;
 }
 // prendo lati cammino minimo	
-vector<unsigned int> latiCamminoMinimo(PolyhedronMesh& polyhedron,vector<unsigned int>& cammino)
+
+vector<unsigned int> latiCamminoMinimo(PolyhedronMesh& polyhedron,
+                                       const vector<unsigned int>& cammino,
+                                       const string& outputDirectory)
 {
-	
-	Eigen::MatrixXi estremi=polyhedron.Cell1DsExtrema;
-	unsigned int n=polyhedron.NumCell1Ds;
-	unsigned int m=cammino.size();
-	vector<unsigned int> lati;
-	for(unsigned int i=0;i<m-1;i++)
-	{
-		
-		unsigned int vertice_id_first=cammino[i];
-		unsigned int vertice_id_second=cammino[i+1];
-		for (unsigned int j=0;j<n;j++)
-		{
-			if((static_cast<unsigned int>(estremi(0,j)) == vertice_id_first && static_cast<unsigned int>(estremi(1,j)) == vertice_id_second) ||
-   (static_cast<unsigned int>(estremi(0,j)) == vertice_id_second && static_cast<unsigned int>(estremi(1,j)) == vertice_id_first))    //perche static cast????
-			{
-				 if (std::find(lati.begin(), lati.end(), j) == lati.end())
-				 {
-						lati.push_back(j);
-				 }
-			}
-				
-			
-			
-			
-			
-		}
-	}
-	for (unsigned int i = 0; i < lati.size(); ++i) 
-	{
-		
-		std::cout << "id lati "<<lati[i] << "\n";
-	}
-	return lati;
+    Eigen::MatrixXi estremi = polyhedron.Cell1DsExtrema;
+    unsigned int n = polyhedron.NumCell1Ds;
+    unsigned int m = cammino.size();
+    vector<unsigned int> lati;
+
+    for (unsigned int i = 0; i < m - 1; i++) {
+        unsigned int v1 = cammino[i];
+        unsigned int v2 = cammino[i + 1];
+        for (unsigned int j = 0; j < n; j++) {
+            if ((static_cast<unsigned int>(estremi(0, j)) == v1 && static_cast<unsigned int>(estremi(1, j)) == v2) ||
+                (static_cast<unsigned int>(estremi(0, j)) == v2 && static_cast<unsigned int>(estremi(1, j)) == v1)) {
+                lati.push_back(j);
+                break;
+            }
+        }
+    }
+
+    // === ESPORTAZIONE UNIFICATA ===
+    vector<double> PointData(polyhedron.NumCell0Ds, 0.0);
+    for (auto id : cammino) PointData[id] = 1.0;
+
+    vector<double> EdgeData(polyhedron.NumCell1Ds, 0.0);
+    for (auto id : lati) EdgeData[id] = 1.0;
+
+    Gedim::UCDProperty<double> PropPoints;
+    PropPoints.Label = "ShortPath";
+    PropPoints.UnitLabel = "";
+    PropPoints.Size = PointData.size();
+    PropPoints.NumComponents = 1;
+    PropPoints.Data = PointData.data();
+
+    Gedim::UCDProperty<double> PropEdges;
+    PropEdges.Label = "ShortPath";
+    PropEdges.UnitLabel = "";
+    PropEdges.Size = EdgeData.size();
+    PropEdges.NumComponents = 1;
+    PropEdges.Data = EdgeData.data();
+
+    Gedim::UCDUtilities utils;
+    utils.ExportPoints(outputDirectory + "/Cell0Ds.inp", polyhedron.Cell0DsCoordinates, { PropPoints });
+    utils.ExportSegments(outputDirectory + "/Cell1Ds.inp", polyhedron.Cell0DsCoordinates, polyhedron.Cell1DsExtrema, {}, { PropEdges });
+
+    return lati;
 }
+
 	
 
 

@@ -30,7 +30,10 @@ vector<unsigned int> DijkstraCamminoMinimo(const vector<list<pair<unsigned int, 
                                            double& lunghezzaTotale,
                                            vector<int>& predecessori);
 // prendo lati cammino minimo	
-vector<unsigned int> latiCamminoMinimo(PolyhedronMesh& polyhedron,vector<unsigned int>& cammino);
+vector<unsigned int> latiCamminoMinimo(PolyhedronMesh& polyhedron,
+                                       const vector<unsigned int>& cammino,
+                                       const string& outputDirectory);
+
 
 
 // Triangolazione geodetica classe I
