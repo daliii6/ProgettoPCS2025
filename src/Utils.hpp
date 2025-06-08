@@ -20,12 +20,25 @@ bool ImportCell2Ds(PolyhedronMesh& polyhedron, const string& InputFileDirectory)
 // Importazione da file
 bool ImportPolyhedronMesh(PolyhedronMesh& polyhedron, const std::string& InputFileDirectory);
 
+//lista adiacenza
+vector<list<pair<unsigned int, double>>> ListaAdiacenza(PolyhedronMesh& mesh);
+
+//Djkstra cammino minimo
+vector<unsigned int> DijkstraCamminoMinimo(const vector<list<pair<unsigned int, double>>>& LA,
+                                           unsigned int id_start,
+                                           unsigned int id_end,
+                                           double& lunghezzaTotale,
+                                           vector<int>& predecessori);
+// prendo lati cammino minimo	
+vector<unsigned int> latiCamminoMinimo(PolyhedronMesh& polyhedron,vector<unsigned int>& cammino);
+
+
 // Triangolazione geodetica classe I
 bool TriangolaClasseI(int p, int q, int b,
                       const PolyhedronMesh& mesh_input,
                       PolyhedronMesh& mesh_output,int c);
 					  // Triangolazione geodetica classe I
-bool TriangolaClasse2(int p, int q, int b_input,
+bool TriangolaClasseII(int p, int q, int b_input,
                       const PolyhedronMesh& mesh_input,
                       PolyhedronMesh& mesh_output,int c_input);
 
@@ -41,4 +54,6 @@ void GeneraEsagono(
     int id_1, int id_2, int id_3, int id_4, int id_5, int id_6,
     int& id_baricentro,
     std::vector<Vector3d>& vertici_out);
+
+    bool CostruisciDualMesh(const PolyhedronMesh& StartPolyhedron, PolyhedronMesh& DualPolyhedron);
 }

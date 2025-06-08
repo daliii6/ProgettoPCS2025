@@ -70,24 +70,46 @@ int main()
         return 1;
     }
 
-    PolyhedronMesh geodesic_mesh;
+PolyhedronMesh geodesic_mesh;
     bool success = false;
-
+	bool flag=true;
     if ((b == 0 && c > 0) || (c == 0 && b > 0)) {
         int param = std::max(b, c);  // usare il parametro diverso da zero
         success = TriangolaClasseI(p, q, param, base_mesh, geodesic_mesh, 0);
     } else if (b == c && b >= 1) {
-        success = TriangolaClasse2(p, q, b, base_mesh, geodesic_mesh, c);
+        success = TriangolaClasseII(p, q, b, base_mesh, geodesic_mesh, c);
     } else {
         cerr << "Errore: valori di b e c non validi. Permessi: (b > 0, c = 0), (b = 0, c > 0), (b = c >= 1).\n";
+		flag=false;
         return 1;
     }
 
-
+	
     if (!success) {
         cerr << "Errore nella triangolazione classe I.\n";
         return 1;
     }
+	if(flag)
+	{
+		int n=geodesic_mesh.NumCell0Ds;
+		vector<list<pair<unsigned int, double>>> LA_geo=ListaAdiacenza(geodesic_mesh);
+		//cammino minimo
+		unsigned int id_start,id_end;
+		cout<<" id compreso tra 0 e "<<n-1<<endl;
+		cout<<"Inserisci id start e id fine";
+		cin>>id_start>>id_end;
+		if (id_start>=0 && id_end<n)
+		{
+			vector<int> predecessori;
+			double lunghezzaTotale;
+			vector<unsigned int> cammino=DijkstraCamminoMinimo(LA_geo,id_start,id_end, lunghezzaTotale,predecessori);
+			vector<unsigned int> lati=latiCamminoMinimo(geodesic_mesh,cammino);
+		}
+		else{
+			cout<<"Errore numero vertici"<<endl;
+		}
+		
+	}
 
 
     string outputDir = "OutputGeodetico/" + name + "_b=" + to_string(b) + "_c=" + to_string(c);
@@ -100,8 +122,8 @@ int main()
 
     cout << "Triangolazione completata. File esportati in: " << outputDir << endl;
     
-  /*  PolyhedronMesh dual_mesh;
-    if (!CostruisciDualGeodetico(geodesic_mesh, dual_mesh)) {
+     PolyhedronMesh dual_mesh;
+    if (!CostruisciDualMesh(geodesic_mesh, dual_mesh)) {
         cerr << "Errore nella costruzione del duale.\n";
         return 1;
     }
@@ -114,5 +136,5 @@ int main()
 
     EsportaUCD(dual_mesh, dualOutputDir);
     cout << "Costruzione del duale completata. File esportati in: " << dualOutputDir << endl;
-    return 0;*/
+    return 0;
 }
