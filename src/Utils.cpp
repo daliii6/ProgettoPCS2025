@@ -28,17 +28,14 @@ bool ImportCell0Ds(PolyhedronMesh& polyhedron, const string& InputFileDirectory)
 {
     ifstream file(InputFileDirectory + "/Cell0Ds.csv");
     if(file.fail()) return false;
-
     list<string> listLines;
     string line;
     while (getline(file, line))
         listLines.push_back(line);
     file.close();
     listLines.pop_front();  // Rimuove l'header
-
     polyhedron.NumCell0Ds = listLines.size();
     if (polyhedron.NumCell0Ds == 0) return false;
-
     polyhedron.Cell0DsId.reserve(polyhedron.NumCell0Ds);
     polyhedron.Cell0DsCoordinates = MatrixXd::Zero(3, polyhedron.NumCell0Ds);
 
@@ -985,29 +982,31 @@ bool CostruisciDualMesh(const PolyhedronMesh& StartPolyhedron, PolyhedronMesh& D
 
 
 
-// Esporta i file .txt
 bool EsportaMeshSuFile(const PolyhedronMesh& mesh, const string& outputDirectory)
 {
     namespace fs = std::filesystem;
     fs::create_directories(outputDirectory);
 
+    // === Cell0Ds.txt ===
     ofstream file0(outputDirectory + "/Cell0Ds.txt");
-    file0 << "Id;Marker;X;Y;Z\n";
+    file0 << "Id;X;Y;Z\n";
     for (size_t i = 0; i < mesh.NumCell0Ds; ++i)
-        file0 << i << ";0;" << mesh.Cell0DsCoordinates(0, i) << ";"
-             << mesh.Cell0DsCoordinates(1, i) << ";" << mesh.Cell0DsCoordinates(2, i) << "\n";
+        file0 << i << ";" << mesh.Cell0DsCoordinates(0, i) << ";"
+              << mesh.Cell0DsCoordinates(1, i) << ";" << mesh.Cell0DsCoordinates(2, i) << "\n";
     file0.close();
 
+    // === Cell1Ds.txt ===
     ofstream file1(outputDirectory + "/Cell1Ds.txt");
-    file1 << "Id;Marker;Origine;Fine\n";
+    file1 << "Id;Origine;Fine\n";
     for (size_t i = 0; i < mesh.NumCell1Ds; ++i)
-        file1 << i << ";0;" << mesh.Cell1DsExtrema(0, i) << ";" << mesh.Cell1DsExtrema(1, i) << "\n";
+        file1 << i << ";" << mesh.Cell1DsExtrema(0, i) << ";" << mesh.Cell1DsExtrema(1, i) << "\n";
     file1.close();
 
+    // === Cell2Ds.txt ===
     ofstream file2(outputDirectory + "/Cell2Ds.txt");
-    file2 << "Id;Marker;NumVertici;Vertici...;NumSpigoli;Spigoli...\n";
+    file2 << "Id;NumVertici;Vertici...;NumSpigoli;Spigoli...\n";
     for (size_t i = 0; i < mesh.NumCell2Ds; ++i) {
-        file2 << i << ";0;" << mesh.Cell2DsVertices[i].size();
+        file2 << i << ";" << mesh.Cell2DsVertices[i].size();
         for (int v : mesh.Cell2DsVertices[i]) file2 << ";" << v;
         file2 << ";" << mesh.Cell2DsEdges[i].size();
         for (int e : mesh.Cell2DsEdges[i]) file2 << ";" << e;
@@ -1015,6 +1014,7 @@ bool EsportaMeshSuFile(const PolyhedronMesh& mesh, const string& outputDirectory
     }
     file2.close();
 
+    // === Cell3Ds.txt ===
     ofstream file3(outputDirectory + "/Cell3Ds.txt");
     file3 << "Id;NumVertici;NumSpigoli;NumFacce;Vertici...;Spigoli...;Facce...\n";
     file3 << "0;" << mesh.NumCell0Ds << ";" << mesh.NumCell1Ds << ";" << mesh.NumCell2Ds;

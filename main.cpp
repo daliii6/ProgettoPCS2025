@@ -21,29 +21,14 @@ void EsportaUCD(const PolyhedronMesh& mesh, const std::string& outputDir)
     const auto& coords = mesh.Cell0DsCoordinates;
     const auto& edges = mesh.Cell1DsExtrema;
 
-    std::vector<double> markers0D(mesh.NumCell0Ds, 0.0);
-    std::vector<double> markers1D(mesh.NumCell1Ds, 0.0);
+    std::vector<UCDProperty<double>> no_properties; // Vuoto
 
-    // === Proprietà per punti ===
-    std::vector<UCDProperty<double>> cell0Ds_properties(1);
-    cell0Ds_properties[0].Label = "Marker";
-    cell0Ds_properties[0].UnitLabel = "-";
-    cell0Ds_properties[0].NumComponents = 1;
-    cell0Ds_properties[0].Data = markers0D.data();
+    utilities.ExportPoints(outputDir + "/Cell0Ds.inp", coords, no_properties);
+    utilities.ExportSegments(outputDir + "/Cell1Ds.inp", coords, edges, {}, no_properties);
 
-    // === Proprietà per segmenti ===
-    std::vector<UCDProperty<double>> cell1Ds_properties(1);
-    cell1Ds_properties[0].Label = "Marker";
-    cell1Ds_properties[0].UnitLabel = "-";
-    cell1Ds_properties[0].NumComponents = 1;
-    cell1Ds_properties[0].Data = markers1D.data();
-
-    // === Esportazione ===
-    utilities.ExportPoints(outputDir + "/Cell0Ds.inp", coords, cell0Ds_properties);
-    utilities.ExportSegments(outputDir + "/Cell1Ds.inp", coords, edges, {}, cell1Ds_properties);
-
-    std::cout << "Esportazione completata: Cell0Ds.inp, Cell1Ds.inp\n";
+    std::cout << "Esportazione completata.\n";
 }
+
 
 int main()
 {
