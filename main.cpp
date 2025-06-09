@@ -85,15 +85,18 @@ int main()
 
     int n = geodesic_mesh.NumCell0Ds;
     cout << "[INFO] Vertici numerati da 0 a " << n - 1 << ".\n";
-
+// se gli indici in input hanno un senso logico in base alla struttura della mesh geodetica calcolo cammino minimo
     if (id_start >= 0 && id_start < n && id_end >= 0 && id_end < n)
     {
+        //costruisco LA:=lista adiacenza, vettori di liste ,ogni lista rappresenta id vertice grafo contenente coppie con id vertice adiacente e distanza
         vector<list<pair<unsigned int, double>>> LA_geo = ListaAdiacenza(geodesic_mesh);
         vector<int> predecessori;
         double lunghezzaTotale;
+        //costruisco cammino:= vettore degli id corrispondenti al percorso trovato
         vector<unsigned int> cammino = DijkstraCamminoMinimo(LA_geo, id_start, id_end, lunghezzaTotale, predecessori);
+        // trovo lati cammino minimo
         vector<unsigned int> lati = latiCamminoMinimo(geodesic_mesh, cammino, outputDir);
-
+    //stampe informazioni ricavate:cammino, lunghezza totale , id archi
         cout << "\n[INFO] Cammino minimo tra i vertici " << id_start << " e " << id_end << ":\n";
         for (size_t i = 0; i < lati.size(); ++i) {
             unsigned int eid = lati[i];
