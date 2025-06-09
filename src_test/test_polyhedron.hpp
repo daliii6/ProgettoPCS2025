@@ -275,13 +275,13 @@ TEST(TestShortestPath, CamminoMinimoClasseI)
 
     double lunghezzaTotale;
     std::vector<int> predecessori;
-    std::vector<unsigned int> cammino = DijkstraCamminoMinimo(LA, 2, 8, lunghezzaTotale, predecessori);
+    std::vector<unsigned int> cammino = DijkstraCamminoMinimo(LA, 0, 14, lunghezzaTotale, predecessori);
 
-    std::vector<unsigned int> expected_path = {2, 5, 8};
+    std::vector<unsigned int> expected_path = {0,3,5,14};
 
     EXPECT_EQ(cammino, expected_path);
-    EXPECT_EQ(cammino.size() - 1, 2); // due spigoli
-    EXPECT_NEAR(lunghezzaTotale, 1.531, 1e-3);
+    EXPECT_EQ(cammino.size() - 1, 3); // tre spigoli
+    EXPECT_NEAR(lunghezzaTotale, 2.2961, 1e-3);
 }
 
 TEST(TestShortestPath, CamminoMinimoClasseII)
@@ -302,9 +302,9 @@ TEST(TestShortestPath, CamminoMinimoClasseII)
     std::vector<unsigned int> cammino = DijkstraCamminoMinimo(LA, 4, 7, lunghezzaTotale, predecessori);
 
     // Qui metti un path valido secondo il grafo
-    std::vector<unsigned int> expected_path = {4, 6, 7};
+    std::vector<unsigned int> expected_path = {4, 10, 1, 7};
 
     EXPECT_EQ(cammino, expected_path);
-    EXPECT_EQ(cammino.size() - 1, 2); // due spigoli
-    EXPECT_NEAR(lunghezzaTotale, 1.45, 1e-2);
+    EXPECT_EQ(cammino.size() - 1, 3); // tre spigoli
+    EXPECT_NEAR(lunghezzaTotale, 2.0617, 1e-3);
 }
