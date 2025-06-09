@@ -156,23 +156,26 @@ bool ImportPolyhedronMesh(PolyhedronMesh& polyhedron, const string& InputFileDir
         && ImportCell2Ds(polyhedron, InputFileDirectory);
 }
 
-
+//funzione che mi costruisce lista di adiacenza prende input mesh
 vector<list<pair<unsigned int, double>>> ListaAdiacenza(PolyhedronMesh& mesh)
 {
 	unsigned int numVertices = mesh.NumCell0Ds;
     vector<list<pair<unsigned int, double>>> LA(numVertices); 
-
+//itero spigoli	
     for (int i = 0; i < mesh.Cell1DsExtrema.cols(); i++) 
 	{
+	// estraggo id estremi arco
         unsigned int id_v1 = mesh.Cell1DsExtrema(0, i);
         unsigned int id_v2 = mesh.Cell1DsExtrema(1, i);
 
         Vector3d coord1 = mesh.Cell0DsCoordinates.col(id_v1);
         Vector3d coord2 = mesh.Cell0DsCoordinates.col(id_v2);
+		//calcolo lunghezza arco
 		Vector3d coord_diff=coord1-coord2;
 		double dist = sqrt(coord_diff[0]*coord_diff[0]+coord_diff[1]*coord_diff[1]+coord_diff[2]*coord_diff[2]);
 		pair<unsigned int, double> arco1(id_v2, dist);
 		pair<unsigned int, double> arco2(id_v1, dist);
+	//push della coppia con id vertice confinante e lunghezza arco
         LA[id_v1].push_back(arco1);
         LA[id_v2].push_back(arco2);  
     }
@@ -180,20 +183,22 @@ vector<list<pair<unsigned int, double>>> ListaAdiacenza(PolyhedronMesh& mesh)
     return LA;
 	
 }
-//Algoritmo djkstra	
+//Algoritmo djkstra per il calcolo cammino minimo tra id_start e id_end	
 vector<unsigned int> DijkstraCamminoMinimo(const vector<list<pair<unsigned int, double>>>& LA,
                                            unsigned int id_start,
                                            unsigned int id_end,
                                            double& lunghezzaTotale,
                                            vector<int>& predecessori)
 {
+	// LA è lista di adiacenza: vettore di liste, ogni lista rappresenta un id ed è fatta di pair contenenti id vertice adiacente e lunghezza arco
     unsigned int numVertici = LA.size();
-	// vettore distanze inizializzato a infinito
+	//  distanza:=vettore distanze inizializzato a +inf
     vector<double> distanza(numVertici, numeric_limits<double>::infinity());
-	//vettore per vedere quali ho visitato
+	//predecessori:= vettore per vedere i predecessori di ogni nodo del grafo che avrà predecessori di ogni nodo in base a cammino minimo
     predecessori.assign(numVertici, -1);
+	//visitato:= vettore booleano
     vector<bool> visitato(numVertici, false);
-	//coda con priorità che estrae elemento minimo
+	//coda con priorità che estrae elemento minima distanza, primo parametro elemento secondo contenitore terzo funzione comparazione
     priority_queue<pair<double, unsigned int>, vector<pair<double, unsigned int>>, greater<>> coda;
 
     distanza[id_start] = 0.0;
@@ -211,6 +216,7 @@ vector<unsigned int> DijkstraCamminoMinimo(const vector<list<pair<unsigned int, 
 		//scorro adiacenza e aggiorno distanze per i vertici adiacenti a u
         for (const auto& [v, peso] : LA[u]) 
 		{
+		//guardo se passando da u ho distanza minore di v da id start
             if (distanza[v] > distanza[u] + peso) 
 			{
                 distanza[v] = distanza[u] + peso;
@@ -219,19 +225,20 @@ vector<unsigned int> DijkstraCamminoMinimo(const vector<list<pair<unsigned int, 
             }
         }
     }
-	//distanza minima
+	//distanza minima da id end e id start
     lunghezzaTotale = distanza[id_end];
 
     vector<unsigned int> cammino;
+	//non andato a buon fine
     if (predecessori[id_end] == -1) return cammino;
-
+	//ricostruisco all'indietro il cammino minimo, dove v assumera i valori degli id di interesse dei predecessori
     for (int v = id_end; v != -1; v = predecessori[v])
         cammino.push_back(v);
-
+	//inverto perchè voglio da id start a id end
     reverse(cammino.begin(), cammino.end());	
     return cammino;
 }
-// prendo lati cammino minimo	
+// funzione che restituisce vettore dei lati  che costituiscono cammino minimo trovato
 
 vector<unsigned int> latiCamminoMinimo(PolyhedronMesh& polyhedron,
                                        const vector<unsigned int>& cammino,
@@ -241,10 +248,11 @@ vector<unsigned int> latiCamminoMinimo(PolyhedronMesh& polyhedron,
     unsigned int n = polyhedron.NumCell1Ds;
     unsigned int m = cammino.size();
     vector<unsigned int> lati;
-
+	//ciclo coppie di vertici id cammino minimo
     for (unsigned int i = 0; i < m - 1; i++) {
         unsigned int v1 = cammino[i];
         unsigned int v2 = cammino[i + 1];
+	    // cerco lato corrispondente alla coppia di indici , controllo bidirezionale perchè grafo non orientato, mi va bene ogni verso 
         for (unsigned int j = 0; j < n; j++) {
             if ((static_cast<unsigned int>(estremi(0, j)) == v1 && static_cast<unsigned int>(estremi(1, j)) == v2) ||
                 (static_cast<unsigned int>(estremi(0, j)) == v2 && static_cast<unsigned int>(estremi(1, j)) == v1)) {
