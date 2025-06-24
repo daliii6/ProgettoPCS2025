@@ -450,7 +450,7 @@ bool TriangolaClasseI(int b,
 }
 
 
-//funzione che da esagono mi prende facce triangolari
+//funzione che da esagono mi prende facce triangolari dell'esagono
 void GeneraEsagono(
     const std::vector<Vector3d>& /*nuovi_vertici*/,
     std::vector<std::vector<int>>& nuove_facce,
@@ -703,6 +703,7 @@ bool TriangolaClasseII(int b_input,
 							id_b_low = nuovi_vertici.size();
 							nuovi_vertici.push_back(b_low);
 						}
+						//funzione che prende le strutture relative a facce e vertici e id esagono
 						 GeneraEsagono(
 										nuovi_vertici, nuove_facce,
 										id_1,id_2, id_3,
