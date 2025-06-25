@@ -134,17 +134,6 @@ bool ImportCell2Ds(PolyhedronMesh& polyhedron, const string& InputFileDirectory)
     return true;
 }
 
-/* Cerca un vettore v all’interno di una lista
-Restituisce l’indice del primo vettore "vicino" (entro toll)
-Se non trova nulla, restituisce -1
-Usata per evitare duplicati nella triangolazione */
-int TrovaVertice(const Vector3d& v, const std::vector<Vector3d>& lista, double toll) {
-    for (int i = 0; i < (int)lista.size(); i++)  
-        if ((lista[i] - v).norm() < toll)
-            return i; //se è stato trovato un vertice uguale
-    return -1;  // se NON è stato trovato un vertice uguale
-}
-
 
 /* Importa l'intero poliedro:
 Chiama le tre funzioni di importazione sopra
@@ -291,7 +280,16 @@ vector<unsigned int> latiCamminoMinimo(PolyhedronMesh& polyhedron,
     return lati;
 }
 
-	
+/* Cerca un vettore v all’interno di una lista
+Restituisce l’indice del primo vettore "vicino" (entro toll)
+Se non trova nulla, restituisce -1
+Usata per evitare duplicati nella triangolazione */
+int TrovaVertice(const Vector3d& v, const vector<Vector3d>& lista, double toll) {
+    for (int i = 0; i < (int)lista.size(); i++)  
+        if ((lista[i] - v).norm() < toll)
+            return i; //se è stato trovato un vertice uguale
+    return -1;  // se NON è stato trovato un vertice uguale
+}
 
 
 /* Triangolazione geodetica di classe I
@@ -299,7 +297,7 @@ Itera sulle facce triangolari del solido platonico
 Costruisce una griglia baricentrica usando parametri (b,0)
 Normalizza ogni punto sulla sfera (perché è un solido geodetico)
 Evita duplicati usando TrovaVertice
-Costruisce facce triangolari locali (nuove_facce) b^2(CREDO)
+Costruisce facce triangolari locali (nuove_facce) b^2
 Costruisce tutti gli spigoli univoci
 Assegna ID a vertici, spigoli e facce
 Riempie le strutture di mesh_output*/
@@ -312,7 +310,7 @@ bool TriangolaClasseI(int b,
     vector<vector<int>> nuove_facce;
 
     //ciclo sulle facce del solido platonico
-    for (size_t f = 0; f < mesh_input.Cell2DsVertices.size(); f++) {  //perchè usiamo size_t? perchè fare .size() restituisce un size_t
+    for (size_t f = 0; f < mesh_input.Cell2DsVertices.size(); f++) {  //fare .size() restituisce un size_t
         const auto& face = mesh_input.Cell2DsVertices[f]; //legge i suoi 3 vertici
         if (face.size() != 3) {
             cerr << "Errore: faccia non triangolare.\n";
@@ -392,9 +390,10 @@ bool TriangolaClasseI(int b,
             int v = faccia[(i + 1) % 3]; //vertice di arrivo del lato successivo
 
             // se esiste già l'inverso (v → u), non inserire (u → v)
-            if (spigoli_set.count({v, u}) == 0) {
-                spigoli_set.insert({u, v});  // salva lo spigolo come appare nella faccia
+            if (spigoli_set.count({v, u}) == 0 && spigoli_set.count({u, v}) == 0) {
+                spigoli_set.insert({u, v});  // salva lo spigolo solo se non esiste già in nessun ordine
             }
+
         }
     }
 
@@ -404,7 +403,7 @@ bool TriangolaClasseI(int b,
     mesh_output.Cell1DsExtrema = MatrixXi(2, spigoli_set.size());
 
     int idx = 0; // assegna id allo spigolo
-    map<pair<int, int>, int> spigolo_id_map; //spigolo_id_map mappa ogni coppia {u, v} all’ID assegnato
+    map<pair<int, int>, int> spigolo_id_map; //spigolo_id_map dizionario che mappa ogni coppia {u, v} all’ID assegnato, accesso O(logn)
     for (const auto& e : spigoli_set) {
         mesh_output.Cell1DsId[idx] = idx; //assegna idx allo spigolo corrente
         mesh_output.Cell1DsExtrema(0, idx) = e.first;
@@ -418,10 +417,10 @@ bool TriangolaClasseI(int b,
     mesh_output.Cell2DsVertices.resize(nuove_facce.size());
     mesh_output.Cell2DsEdges.resize(nuove_facce.size());
 
-    for (int i = 0; i < (int)nuove_facce.size(); i++) {//Scorre su tutte le facce i generate dalla triangolazione baricentrica
+    for (int i = 0; i < (int)nuove_facce.size(); i++) {//Scorre su tutte le facce i generate dalla triangolazione
         mesh_output.Cell2DsId[i] = i; //assegna id = i alla faccia
         //Copia la tripla {a, b, c} della faccia corrente in Cell2DsVertices[i]
-        mesh_output.Cell2DsVertices[i] = std::vector<unsigned int>(nuove_facce[i].begin(), nuove_facce[i].end()); 
+        mesh_output.Cell2DsVertices[i] = vector<unsigned int>(nuove_facce[i].begin(), nuove_facce[i].end()); 
 
         vector<unsigned int> edges;
         //estraggo i 3 lati della faccia
