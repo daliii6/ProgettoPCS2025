@@ -157,22 +157,26 @@ bool ImportPolyhedronMesh(PolyhedronMesh& polyhedron, const string& InputFileDir
 }
 
 
+//funzione che mi costruisce lista di adiacenza prende input mesh
 vector<list<pair<unsigned int, double>>> ListaAdiacenza(PolyhedronMesh& mesh)
 {
 	unsigned int numVertices = mesh.NumCell0Ds;
     vector<list<pair<unsigned int, double>>> LA(numVertices); 
-
+//itero spigoli	
     for (int i = 0; i < mesh.Cell1DsExtrema.cols(); i++) 
 	{
+	// estraggo id estremi arco
         unsigned int id_v1 = mesh.Cell1DsExtrema(0, i);
         unsigned int id_v2 = mesh.Cell1DsExtrema(1, i);
 
         Vector3d coord1 = mesh.Cell0DsCoordinates.col(id_v1);
         Vector3d coord2 = mesh.Cell0DsCoordinates.col(id_v2);
+		//calcolo lunghezza arco
 		Vector3d coord_diff=coord1-coord2;
 		double dist = sqrt(coord_diff[0]*coord_diff[0]+coord_diff[1]*coord_diff[1]+coord_diff[2]*coord_diff[2]);
 		pair<unsigned int, double> arco1(id_v2, dist);
 		pair<unsigned int, double> arco2(id_v1, dist);
+	//push della coppia con id vertice confinante e lunghezza arco
         LA[id_v1].push_back(arco1);
         LA[id_v2].push_back(arco2);  
     }
@@ -180,20 +184,22 @@ vector<list<pair<unsigned int, double>>> ListaAdiacenza(PolyhedronMesh& mesh)
     return LA;
 	
 }
-//Algoritmo djkstra	
+//Algoritmo djkstra per il calcolo cammino minimo tra id_start e id_end	
 vector<unsigned int> DijkstraCamminoMinimo(const vector<list<pair<unsigned int, double>>>& LA,
                                            unsigned int id_start,
                                            unsigned int id_end,
                                            double& lunghezzaTotale,
                                            vector<int>& predecessori)
 {
+	// LA è lista di adiacenza: vettore di liste, ogni lista rappresenta un id ed è fatta di pair contenenti id vertice adiacente e lunghezza arco
     unsigned int numVertici = LA.size();
-	// vettore distanze inizializzato a infinito
+	//  distanza:=vettore distanze inizializzato a +inf
     vector<double> distanza(numVertici, numeric_limits<double>::infinity());
-	//vettore per vedere quali ho visitato
+	//predecessori:= vettore per vedere i predecessori di ogni nodo del grafo che avrà predecessori di ogni nodo in base a cammino minimo
     predecessori.assign(numVertici, -1);
+	//visitato:= vettore booleano
     vector<bool> visitato(numVertici, false);
-	//coda con priorità che estrae elemento minimo
+	//coda con priorità che estrae elemento minima distanza, primo parametro elemento secondo contenitore terzo funzione comparazione
     priority_queue<pair<double, unsigned int>, vector<pair<double, unsigned int>>, greater<>> coda;
 
     distanza[id_start] = 0.0;
@@ -211,6 +217,7 @@ vector<unsigned int> DijkstraCamminoMinimo(const vector<list<pair<unsigned int, 
 		//scorro adiacenza e aggiorno distanze per i vertici adiacenti a u
         for (const auto& [v, peso] : LA[u]) 
 		{
+		//guardo se passando da u ho distanza minore di v da id start
             if (distanza[v] > distanza[u] + peso) 
 			{
                 distanza[v] = distanza[u] + peso;
@@ -219,19 +226,20 @@ vector<unsigned int> DijkstraCamminoMinimo(const vector<list<pair<unsigned int, 
             }
         }
     }
-	//distanza minima
+	//distanza minima da id end e id start
     lunghezzaTotale = distanza[id_end];
 
     vector<unsigned int> cammino;
+	//non andato a buon fine
     if (predecessori[id_end] == -1) return cammino;
-
+	//ricostruisco all'indietro il cammino minimo, dove v assumera i valori degli id di interesse dei predecessori
     for (int v = id_end; v != -1; v = predecessori[v])
         cammino.push_back(v);
-
+	//inverto perchè voglio da id start a id end
     reverse(cammino.begin(), cammino.end());	
     return cammino;
 }
-// prendo lati cammino minimo	
+// funzione che restituisce vettore dei lati  che costituiscono cammino minimo trovato
 
 vector<unsigned int> latiCamminoMinimo(PolyhedronMesh& polyhedron,
                                        const vector<unsigned int>& cammino,
@@ -241,10 +249,11 @@ vector<unsigned int> latiCamminoMinimo(PolyhedronMesh& polyhedron,
     unsigned int n = polyhedron.NumCell1Ds;
     unsigned int m = cammino.size();
     vector<unsigned int> lati;
-
+	//ciclo coppie di vertici id cammino minimo
     for (unsigned int i = 0; i < m - 1; i++) {
         unsigned int v1 = cammino[i];
         unsigned int v2 = cammino[i + 1];
+	    // cerco lato corrispondente alla coppia di indici , controllo bidirezionale perchè grafo non orientato, mi va bene ogni verso 
         for (unsigned int j = 0; j < n; j++) {
             if ((static_cast<unsigned int>(estremi(0, j)) == v1 && static_cast<unsigned int>(estremi(1, j)) == v2) ||
                 (static_cast<unsigned int>(estremi(0, j)) == v2 && static_cast<unsigned int>(estremi(1, j)) == v1)) {
@@ -440,7 +449,7 @@ bool TriangolaClasseI(int b,
 }
 
 
-//funzione che da esagono mi prende facce triangolari
+//funzione che da esagono mi prende facce triangolari dell'esagono
 void GeneraEsagono(
     const std::vector<Vector3d>& /*nuovi_vertici*/,
     std::vector<std::vector<int>>& nuove_facce,
@@ -459,7 +468,7 @@ void GeneraEsagono(
 
 
 
-
+// triangolo classe 2 che mi restituisce un oggetto PolyhedronMesh 
 bool TriangolaClasseII(int b_input,
                       const PolyhedronMesh& mesh_input,
                       PolyhedronMesh& mesh_output)
@@ -468,7 +477,7 @@ bool TriangolaClasseII(int b_input,
 
     std::vector<Vector3d> nuovi_vertici;
     std::vector<std::vector<int>> nuove_facce;
-
+	//itero su ogni faccia
     for (size_t f = 0; f < mesh_input.Cell2DsVertices.size(); f++) 
     {
 		
@@ -481,7 +490,7 @@ bool TriangolaClasseII(int b_input,
         Vector3d v0 = mesh_input.Cell0DsCoordinates.col(face[0]);
         Vector3d v1 = mesh_input.Cell0DsCoordinates.col(face[1]);
         Vector3d v2 = mesh_input.Cell0DsCoordinates.col(face[2]);
-
+	//costruzione griglia baricentrica uguale a cl 1
         std::vector<std::vector<int>> index_grid(b + 1);
 
         for (int i = 0; i <= b; i++) {
@@ -498,7 +507,7 @@ bool TriangolaClasseII(int b_input,
                 index_grid[i][j] = id;
             }
         }
-
+	//caso b=c=1 semplice, prendo solo baricentro triangolo e tutti i punti medi dei lati
         if (b == 1) {
             int id_p1 = index_grid[0][0];
             int id_p2 = index_grid[0][1];
@@ -550,6 +559,7 @@ bool TriangolaClasseII(int b_input,
 			int it_facce_lat=0;
 			int it_esa=0;
 			int it_es_tri=0;
+		// doppio for in cui seleziono due triangoli consecutivi orizzontalmente e quello sopra e scorro lungo righe e dopo salto in alto verso cima
             for (int a = 0; a < b; a++) {
                 int k = index_grid[a].size();
 				
@@ -560,7 +570,7 @@ bool TriangolaClasseII(int b_input,
                         m+1 >= index_grid[a+1].size()) {
                         continue; // evita accessi fuori limite
                     } */
-
+			//vertici triangolo  normale
                     int id_p1 = index_grid[a][m];
                     int id_p2 = index_grid[a][m+1];
                     int id_p3 = index_grid[a+1][m];
@@ -568,7 +578,7 @@ bool TriangolaClasseII(int b_input,
                     Vector3d p1 = nuovi_vertici[id_p1];
                     Vector3d p2 = nuovi_vertici[id_p2];
                     Vector3d p3 = nuovi_vertici[id_p3];
-
+			// prendo primo baricentro
                     Vector3d b_up = ((p1 + p2 + p3) / 3.0).normalized();
 					it+=1;
                     int id_bar_up = TrovaVertice(b_up, nuovi_vertici);
@@ -576,7 +586,7 @@ bool TriangolaClasseII(int b_input,
                         id_bar_up = nuovi_vertici.size();
                         nuovi_vertici.push_back(b_up);
                     }
-
+			//se a =0 prendo punti alla base della faccia di partenza
                     if (a == 0) {
                         Vector3d m12_up = ((p1 + p2) / 2.0).normalized();
                         int id_m12 = TrovaVertice(m12_up, nuovi_vertici);
@@ -590,7 +600,7 @@ bool TriangolaClasseII(int b_input,
 						it_facce_lat +=1;
 						it_facce_lat +=1;
                     }
-
+		//in questi due if se m è all'inizio o alla fine della griglia prendo punt medi laterali
                     if (m == k - 2) {
                         Vector3d m23_up = ((p2 + p3) / 2.0).normalized();
 						it+=1;
@@ -633,6 +643,8 @@ bool TriangolaClasseII(int b_input,
                         Vector3d d1 = nuovi_vertici[id_d1];
                         Vector3d d2 = nuovi_vertici[id_d2];
                         Vector3d d3 = nuovi_vertici[id_d3]; */
+
+			//uso static_cast che mi connverte da unsigned int a intero perchè m+1 lo è
                     if (a < b - 1 && m + 1 < static_cast<int>(index_grid[a + 1].size()))
 					{
 						it +=1;
@@ -690,6 +702,7 @@ bool TriangolaClasseII(int b_input,
 							id_b_low = nuovi_vertici.size();
 							nuovi_vertici.push_back(b_low);
 						}
+						//funzione che prende le strutture relative a facce e vertici e id esagono
 						 GeneraEsagono(
 										nuovi_vertici, nuove_facce,
 										id_1,id_2, id_3,
@@ -784,6 +797,7 @@ bool TriangolaClasseII(int b_input,
 
     return true;
 }
+
 
 
 
