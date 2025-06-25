@@ -123,6 +123,6 @@ int main()
     }
 
     EsportaUCD(dual_mesh, dualOutputDir);
-    cout << "[INFO] Doppio geodetico esportato in: " << dualOutputDir << "\n";
+    cout << "[INFO] Duale geodetico esportato in: " << dualOutputDir << "\n";
     return 0;
 }

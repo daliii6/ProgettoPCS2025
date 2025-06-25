@@ -303,7 +303,7 @@ bool TriangolaClasseI(int b,
     vector<vector<int>> nuove_facce;
 
     //ciclo sulle facce del solido platonico
-    for (size_t f = 0; f < mesh_input.Cell2DsVertices.size(); f++) {  //perche usiamo size_t? perchè fare .size() restituisce un size_t
+    for (size_t f = 0; f < mesh_input.Cell2DsVertices.size(); f++) {  //perchè usiamo size_t? perchè fare .size() restituisce un size_t
         const auto& face = mesh_input.Cell2DsVertices[f]; //legge i suoi 3 vertici
         if (face.size() != 3) {
             cerr << "Errore: faccia non triangolare.\n";
@@ -386,8 +386,6 @@ bool TriangolaClasseI(int b,
             if (spigoli_set.count({v, u}) == 0) {
                 spigoli_set.insert({u, v});  // salva lo spigolo come appare nella faccia
             }
-            /*questo permette di rispettare la condizione
-            faces.vertices[e] == faces.edges[e].origin*/
         }
     }
 
@@ -788,6 +786,8 @@ bool TriangolaClasseII(int b_input,
 }
 
 
+
+
 /* Prende in input l'identificativo di un vertice `vertex_id`
 e una struttura `PolyhedronMesh` che rappresenta un poliedro. Restituisce
 un vettore di interi contenente gli ID delle facce adiacenti a quel vertice,
@@ -797,26 +797,21 @@ Questo ordinamento è utile, per costruire il poliedro duale,
 dove ogni vertice del duale si trova nel baricentro di una faccia e i vertici adiacenti
 devono essere collegati in ordine corretto per formare una faccia planare.*/
 
-
-std::vector<int> OrdinaFacceAttornoAlVertice(int vertex_id, const PolyhedronMesh& mesh) {
-    std::vector<int> facce_condivise;
+vector<int> OrdinaFacceAttornoAlVertice(int vertex_id, const PolyhedronMesh& mesh) {
+    vector<int> facce_condivise;
 
     // Trova tutte le facce che contengono il vertice `vertex_id`
     for (size_t fid = 0; fid < mesh.NumCell2Ds; fid++) {
         const auto& face = mesh.Cell2DsVertices[fid];
-        if (std::find(face.begin(), face.end(), vertex_id) != face.end())
+        if (find(face.begin(), face.end(), vertex_id) != face.end())
             facce_condivise.push_back(fid);
     }
 
-    // Se ci sono 2 o meno facce, l'ordinamento non è necessario
-    if (facce_condivise.size() <= 2)
-        return facce_condivise;
-
     // Inizializza il vettore che conterrà le facce ordinate
-    std::vector<int> ordered_faces;
+    vector<int> ordered_faces;
 
     // Insieme per tenere traccia delle facce già usate (evita duplicati)
-    std::set<int> usate;
+    set<int> usate;
 
     // Partiamo arbitrariamente dalla prima faccia trovata
     ordered_faces.push_back(facce_condivise[0]);
@@ -842,11 +837,11 @@ std::vector<int> OrdinaFacceAttornoAlVertice(int vertex_id, const PolyhedronMesh
             // Conta quanti vertici f1 e f2 hanno in comune
             int count_comuni = 0;
             for (int v : f2)
-                if (std::find(f1.begin(), f1.end(), v) != f1.end())
+                if (find(f1.begin(), f1.end(), v) != f1.end())
                     count_comuni++;
 
             // Condizione di adiacenza: f2 contiene vertex_id e condivide 2 vertici con f1
-            if (std::find(f2.begin(), f2.end(), vertex_id) != f2.end() && count_comuni == 2) {
+            if (find(f2.begin(), f2.end(), vertex_id) != f2.end() && count_comuni == 2) {
                 // Aggiunge la nuova faccia all'ordine
                 ordered_faces.push_back(fid);
                 usate.insert(fid);
@@ -859,6 +854,7 @@ std::vector<int> OrdinaFacceAttornoAlVertice(int vertex_id, const PolyhedronMesh
     // Restituisce la lista di facce ordinate attorno al vertice
     return ordered_faces;
 }
+
 
 
 
@@ -876,13 +872,13 @@ std::vector<int> OrdinaFacceAttornoAlVertice(int vertex_id, const PolyhedronMesh
 bool CostruisciDualMesh(const PolyhedronMesh& StartPolyhedron, PolyhedronMesh& DualPolyhedron)
 {
     // Vettore dei nuovi vertici (baricentri delle facce originali)
-    std::vector<Vector3d> nuovi_vertici;
+    vector<Vector3d> nuovi_vertici;
 
     // Facce del duale: ciascuna è una lista di indici di baricentri (cioè vertici duali)
-    std::vector<std::vector<int>> nuove_facce;
+    vector<vector<int>> nuove_facce;
 
     // Mappa da ID faccia originale → ID vertice nel duale (baricentro)
-    std::map<int, int> face_to_dual_vertex;
+    map<int, int> face_to_dual_vertex;
 
     // FASE 1: Calcola i baricentri delle facce originali → vertici del duale
     for (size_t fid = 0; fid < StartPolyhedron.NumCell2Ds; ++fid) {
@@ -911,10 +907,10 @@ bool CostruisciDualMesh(const PolyhedronMesh& StartPolyhedron, PolyhedronMesh& D
     // FASE 2: Ogni vertice del poliedro originale genera una faccia del duale
     for (size_t vid = 0; vid < StartPolyhedron.NumCell0Ds; ++vid) {
         // Ordina le facce attorno al vertice vid (in senso ciclico)
-        std::vector<int> ordered_faces = OrdinaFacceAttornoAlVertice(vid, StartPolyhedron);
+        vector<int> ordered_faces = OrdinaFacceAttornoAlVertice(vid, StartPolyhedron);
 
         // Costruisci la faccia del duale con i vertici corrispondenti ai baricentri ordinati
-        std::vector<int> faccia_duale;
+        vector<int> faccia_duale;
         for (int fid : ordered_faces)
             faccia_duale.push_back(face_to_dual_vertex[fid]);
 
@@ -926,17 +922,17 @@ bool CostruisciDualMesh(const PolyhedronMesh& StartPolyhedron, PolyhedronMesh& D
     DualPolyhedron.Cell0DsId.resize(nuovi_vertici.size());
     DualPolyhedron.Cell0DsCoordinates = MatrixXd(3, nuovi_vertici.size());
 
-    for (int i = 0; i < (int)nuovi_vertici.size(); ++i) {
+    for (int i = 0; i < (int)nuovi_vertici.size(); i++) {
         DualPolyhedron.Cell0DsId[i] = i;
         DualPolyhedron.Cell0DsCoordinates.col(i) = nuovi_vertici[i];
     }
 
     // FASE 4: Costruzione degli spigoli del duale
     // Uso un set per evitare duplicati, tenendo conto della direzione
-    std::set<std::pair<int, int>> spigoli_set;
+    set<pair<int, int>> spigoli_set;
 
     for (const auto& faccia : nuove_facce) {
-        for (size_t i = 0; i < faccia.size(); ++i) {
+        for (size_t i = 0; i < faccia.size(); i++) {
             int u = faccia[i];
             int v = faccia[(i + 1) % faccia.size()];
             // Salva l'arco (u,v) solo se (v,u) non è già stato aggiunto
@@ -950,7 +946,7 @@ bool CostruisciDualMesh(const PolyhedronMesh& StartPolyhedron, PolyhedronMesh& D
     DualPolyhedron.Cell1DsExtrema = MatrixXi(2, spigoli_set.size());
 
     // Mappa da coppia di vertici → ID spigolo
-    std::map<std::pair<int, int>, int> edge_map;
+    map<pair<int, int>, int> edge_map;
     int eid = 0;
     for (const auto& e : spigoli_set) {
         DualPolyhedron.Cell1DsId[eid] = eid;
@@ -970,11 +966,11 @@ bool CostruisciDualMesh(const PolyhedronMesh& StartPolyhedron, PolyhedronMesh& D
         DualPolyhedron.Cell2DsId[i] = i;
 
         // Vertici della faccia (convertiti a unsigned int)
-        std::vector<unsigned int> vertici_unsigned(nuove_facce[i].begin(), nuove_facce[i].end());
+        vector<unsigned int> vertici_unsigned(nuove_facce[i].begin(), nuove_facce[i].end());
         DualPolyhedron.Cell2DsVertices[i] = vertici_unsigned;
 
         // Trova gli spigoli corrispondenti
-        std::vector<unsigned int> edges;
+        vector<unsigned int> edges;
         for (size_t j = 0; j < nuove_facce[i].size(); ++j) {
             int u = nuove_facce[i][j];
             int v = nuove_facce[i][(j + 1) % nuove_facce[i].size()];
@@ -983,7 +979,7 @@ bool CostruisciDualMesh(const PolyhedronMesh& StartPolyhedron, PolyhedronMesh& D
             } else if (edge_map.count({v, u})) {
                 edges.push_back(edge_map[{v, u}]);
             } else {
-                std::cerr << "Errore: spigolo non trovato tra " << u << " e " << v << std::endl;
+                cerr << "Errore: spigolo non trovato tra " << u << " e " << v << endl;
             }
         }
 
@@ -993,6 +989,7 @@ bool CostruisciDualMesh(const PolyhedronMesh& StartPolyhedron, PolyhedronMesh& D
     // Costruzione completata con successo
     return true;
 }
+
 
 
 

@@ -1,4 +1,5 @@
 #pragma once
+
 #include <iostream>
 #include <vector>
 #include <array>
@@ -11,34 +12,50 @@ using namespace Eigen;
 
 namespace PolyhedronLibrary {
 
+/*Struttura dati per rappresentare una mesh di poliedro.
+ 
+ La mesh è definita da celle di dimensioni da 0D a 3D:
+ - 0D: punti (nodi)
+ - 1D: segmenti (spigoli)
+ - 2D: facce (poligoni)
+ - 3D: celle volumetriche
+ */
 struct PolyhedronMesh
 {
-    // Numero di celle di ogni tipo
-    unsigned int NumCell0Ds;
-    unsigned int NumCell1Ds;
-    unsigned int NumCell2Ds;
-    unsigned int NumCell3Ds;
-	
 
-    // Identificativi delle celle
-    vector<unsigned int> Cell0DsId; ///< Cell0D id, size 1 x NumberCell0D
-    vector<unsigned int> Cell1DsId; ///< Cell1D id, size 1 x NumberCell1D
-    vector<unsigned int> Cell2DsId; ///< Cell2D id, size 1 x NumberCell2D
+    unsigned int NumCell0Ds; ///< Numero di celle 0D (vertici)
+    unsigned int NumCell1Ds; ///< Numero di celle 1D (spigoli)
+    unsigned int NumCell2Ds; ///< Numero di celle 2D (facce)
+    unsigned int NumCell3Ds; ///< Numero di celle 3D (poliedri)
+
+    // Identificativi univoci delle celle
 
 
-    // Coordinate dei punti (Cell0D)
-    Eigen::MatrixXd Cell0DsCoordinates; // uso matrici per le funzioni di export di Vicini
+    vector<unsigned int> Cell0DsId; ///< ID univoci delle celle 0D, dimensione: 1 x NumCell0Ds
+    vector<unsigned int> Cell1DsId; ///< ID univoci delle celle 1D, dimensione: 1 x NumCell1Ds
+    vector<unsigned int> Cell2DsId; ///< ID univoci delle celle 2D, dimensione: 1 x NumCell2Ds
 
-    // Estremi dei segmenti (Cell1D): matrice 2xN con indici dei punti
-    Eigen::MatrixXi Cell1DsExtrema;  ///< Cell1D vertices indices, size 2 x NumberCell1D (fromId,toId)
 
-    // Vertici dei poligoni (Cell2D)
-    vector<vector<unsigned int>> Cell2DsVertices; ///< Cell2D Vertices indices, size 1 x NumberCell2DVertices[NumberCell2D]
+    /*
+    Matrice double (3 x NumCell0Ds): ogni colonna rappresenta le coordinate di un punto nello spazio 3D.
+    */
+    MatrixXd Cell0DsCoordinates;
 
-    // Lati dei poligoni (Cell2D)
-    vector<vector<unsigned int>> Cell2DsEdges; ///< Cell2D Cell1D indices, size 1 x NumberCell2DEdges[NumberCell2D]
+    /*
+    Matrice intera (2 x NumCell1Ds): ogni colonna contiene gli ID dei due nodi che definiscono lo spigolo (da -> a).
+    */
+    MatrixXi Cell1DsExtrema;
 
+    /*
+    Ogni elemento del vettore è un vettore contenente gli ID dei vertici che costituiscono la faccia.
+    L'ordine è importante per la definizione dell'orientamento.
+    */
+    vector<vector<unsigned int>> Cell2DsVertices;
+
+    /*
+    Ogni elemento del vettore è un vettore contenente gli ID degli spigoli (celle 1D) che compongono la faccia.
+    */
+    vector<vector<unsigned int>> Cell2DsEdges;
 };
 
 }
-
