@@ -450,7 +450,7 @@ bool TriangolaClasseI(int b,
 }
 
 
-//funzione che da esagono mi prende facce triangolari
+//funzione che da esagono mi prende facce triangolari dell'esagono
 void GeneraEsagono(
     const std::vector<Vector3d>& /*nuovi_vertici*/,
     std::vector<std::vector<int>>& nuove_facce,
@@ -469,7 +469,7 @@ void GeneraEsagono(
 
 
 
-
+// triangolo classe 2 che mi restituisce un oggetto PolyhedronMesh 
 bool TriangolaClasseII(int b_input,
                       const PolyhedronMesh& mesh_input,
                       PolyhedronMesh& mesh_output)
@@ -478,7 +478,7 @@ bool TriangolaClasseII(int b_input,
 
     std::vector<Vector3d> nuovi_vertici;
     std::vector<std::vector<int>> nuove_facce;
-
+	//itero su ogni faccia
     for (size_t f = 0; f < mesh_input.Cell2DsVertices.size(); f++) 
     {
 		
@@ -491,7 +491,7 @@ bool TriangolaClasseII(int b_input,
         Vector3d v0 = mesh_input.Cell0DsCoordinates.col(face[0]);
         Vector3d v1 = mesh_input.Cell0DsCoordinates.col(face[1]);
         Vector3d v2 = mesh_input.Cell0DsCoordinates.col(face[2]);
-
+	//costruzione griglia baricentrica uguale a cl 1
         std::vector<std::vector<int>> index_grid(b + 1);
 
         for (int i = 0; i <= b; i++) {
@@ -508,7 +508,7 @@ bool TriangolaClasseII(int b_input,
                 index_grid[i][j] = id;
             }
         }
-
+	//caso b=c=1 semplice, prendo solo baricentro triangolo e tutti i punti medi dei lati
         if (b == 1) {
             int id_p1 = index_grid[0][0];
             int id_p2 = index_grid[0][1];
@@ -560,6 +560,7 @@ bool TriangolaClasseII(int b_input,
 			int it_facce_lat=0;
 			int it_esa=0;
 			int it_es_tri=0;
+		// doppio for in cui seleziono due triangoli consecutivi orizzontalmente e quello sopra e scorro lungo righe e dopo salto in alto verso cima
             for (int a = 0; a < b; a++) {
                 int k = index_grid[a].size();
 				
@@ -570,7 +571,7 @@ bool TriangolaClasseII(int b_input,
                         m+1 >= index_grid[a+1].size()) {
                         continue; // evita accessi fuori limite
                     } */
-
+			//vertici triangolo  normale
                     int id_p1 = index_grid[a][m];
                     int id_p2 = index_grid[a][m+1];
                     int id_p3 = index_grid[a+1][m];
@@ -578,7 +579,7 @@ bool TriangolaClasseII(int b_input,
                     Vector3d p1 = nuovi_vertici[id_p1];
                     Vector3d p2 = nuovi_vertici[id_p2];
                     Vector3d p3 = nuovi_vertici[id_p3];
-
+			// prendo primo baricentro
                     Vector3d b_up = ((p1 + p2 + p3) / 3.0).normalized();
 					it+=1;
                     int id_bar_up = TrovaVertice(b_up, nuovi_vertici);
@@ -586,7 +587,7 @@ bool TriangolaClasseII(int b_input,
                         id_bar_up = nuovi_vertici.size();
                         nuovi_vertici.push_back(b_up);
                     }
-
+			//se a =0 prendo punti alla base della faccia di partenza
                     if (a == 0) {
                         Vector3d m12_up = ((p1 + p2) / 2.0).normalized();
                         int id_m12 = TrovaVertice(m12_up, nuovi_vertici);
@@ -600,7 +601,7 @@ bool TriangolaClasseII(int b_input,
 						it_facce_lat +=1;
 						it_facce_lat +=1;
                     }
-
+		//in questi due if se m è all'inizio o alla fine della griglia prendo punt medi laterali
                     if (m == k - 2) {
                         Vector3d m23_up = ((p2 + p3) / 2.0).normalized();
 						it+=1;
@@ -643,6 +644,8 @@ bool TriangolaClasseII(int b_input,
                         Vector3d d1 = nuovi_vertici[id_d1];
                         Vector3d d2 = nuovi_vertici[id_d2];
                         Vector3d d3 = nuovi_vertici[id_d3]; */
+
+			//uso static_cast che mi connverte da unsigned int a intero perchè m+1 lo è
                     if (a < b - 1 && m + 1 < static_cast<int>(index_grid[a + 1].size()))
 					{
 						it +=1;
@@ -700,6 +703,7 @@ bool TriangolaClasseII(int b_input,
 							id_b_low = nuovi_vertici.size();
 							nuovi_vertici.push_back(b_low);
 						}
+						//funzione che prende le strutture relative a facce e vertici e id esagono
 						 GeneraEsagono(
 										nuovi_vertici, nuove_facce,
 										id_1,id_2, id_3,
