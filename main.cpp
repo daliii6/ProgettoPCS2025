@@ -86,7 +86,7 @@ int main()
     int n = geodesic_mesh.NumCell0Ds;
     cout << "[INFO] Vertici numerati da 0 a " << n - 1 << ".\n";
 // se gli indici in input hanno un senso logico in base alla struttura della mesh geodetica calcolo cammino minimo
-    if (id_start >= 0 && id_start < n && id_end >= 0 && id_end < n)
+    if (id_start >= 0 && id_start < n && id_end >= 0 && id_end < n && id_start != id_end)
     {
         //costruisco LA:=lista adiacenza, vettori di liste ,ogni lista rappresenta id vertice grafo contenente coppie con id vertice adiacente e distanza
         vector<list<pair<unsigned int, double>>> LA_geo = ListaAdiacenza(geodesic_mesh);
