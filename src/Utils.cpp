@@ -801,8 +801,8 @@ bool TriangolaClasseII(int b_input,
 
 
 
-/* Prende in input l'identificativo di un vertice `vertex_id`
-e una struttura `PolyhedronMesh` che rappresenta un poliedro. Restituisce
+/* Prende in input l'identificativo di un vertice 'vertex_id'
+e una struttura 'PolyhedronMesh' che rappresenta un poliedro. Restituisce
 un vettore di interi contenente gli ID delle facce adiacenti a quel vertice,
 ordinati in modo tale che ogni faccia condivida un lato (due vertici) con la successiva.
 
@@ -813,8 +813,8 @@ devono essere collegati in ordine corretto per formare una faccia planare.*/
 vector<int> OrdinaFacceAttornoAlVertice(int vertex_id, const PolyhedronMesh& mesh) {
     vector<int> facce_condivise;
 
-    // Trova tutte le facce che contengono il vertice `vertex_id`
-    for (size_t fid = 0; fid < mesh.NumCell2Ds; fid++) {
+    // Trova tutte le facce che contengono il vertice 'vertex_id'
+    for (unsigned int fid = 0; fid < mesh.NumCell2Ds; fid++) {
         const auto& face = mesh.Cell2DsVertices[fid];
         if (find(face.begin(), face.end(), vertex_id) != face.end())
             facce_condivise.push_back(fid);
@@ -871,14 +871,14 @@ vector<int> OrdinaFacceAttornoAlVertice(int vertex_id, const PolyhedronMesh& mes
 
 
 
-/* Dato un poliedro triangolato `StartPolyhedron`, questa funzione costruisce il suo duale
-`DualPolyhedron`, seguendo la regola della dualità:
+/* Dato un poliedro triangolato 'StartPolyhedron', questa funzione costruisce il suo duale
+'DualPolyhedron', seguendo la regola della dualità:
 - Ogni faccia del poliedro originale diventa un vertice del duale (posto nel baricentro).
 - Ogni vertice del poliedro originale genera una faccia del duale, composta dai vertici
      duali delle facce che gli sono adiacenti (ordinati ciclicamente attorno al vertice).
 - Gli spigoli del duale collegano i vertici duali di facce adiacenti.
 
- La funzione aggiorna le strutture Cell0Ds, Cell1Ds, Cell2Ds di `DualPolyhedron`.
+ La funzione aggiorna le strutture Cell0Ds, Cell1Ds, Cell2Ds di 'DualPolyhedron'.
 
  Ritorna true se la costruzione è andata a buon fine.*/
 
@@ -894,7 +894,7 @@ bool CostruisciDualMesh(const PolyhedronMesh& StartPolyhedron, PolyhedronMesh& D
     map<int, int> face_to_dual_vertex;
 
     // FASE 1: Calcola i baricentri delle facce originali → vertici del duale
-    for (size_t fid = 0; fid < StartPolyhedron.NumCell2Ds; ++fid) {
+    for (unsigned int fid = 0; fid < StartPolyhedron.NumCell2Ds; fid++) {
         const auto& face = StartPolyhedron.Cell2DsVertices[fid];
 
         // Calcolo del baricentro come media delle coordinate dei vertici
@@ -918,7 +918,7 @@ bool CostruisciDualMesh(const PolyhedronMesh& StartPolyhedron, PolyhedronMesh& D
     }
 
     // FASE 2: Ogni vertice del poliedro originale genera una faccia del duale
-    for (size_t vid = 0; vid < StartPolyhedron.NumCell0Ds; ++vid) {
+    for (unsigned int vid = 0; vid < StartPolyhedron.NumCell0Ds; vid++) {
         // Ordina le facce attorno al vertice vid (in senso ciclico)
         vector<int> ordered_faces = OrdinaFacceAttornoAlVertice(vid, StartPolyhedron);
 
@@ -958,7 +958,7 @@ bool CostruisciDualMesh(const PolyhedronMesh& StartPolyhedron, PolyhedronMesh& D
     DualPolyhedron.Cell1DsId.resize(spigoli_set.size());
     DualPolyhedron.Cell1DsExtrema = MatrixXi(2, spigoli_set.size());
 
-    // Mappa da coppia di vertici → ID spigolo
+    // Dizionario da coppia di vertici → ID spigolo
     map<pair<int, int>, int> edge_map;
     int eid = 0;
     for (const auto& e : spigoli_set) {
@@ -975,7 +975,7 @@ bool CostruisciDualMesh(const PolyhedronMesh& StartPolyhedron, PolyhedronMesh& D
     DualPolyhedron.Cell2DsVertices.resize(nuove_facce.size());
     DualPolyhedron.Cell2DsEdges.resize(nuove_facce.size());
 
-    for (int i = 0; i < (int)nuove_facce.size(); ++i) {
+    for (int i = 0; i < (int)nuove_facce.size(); i++) {
         DualPolyhedron.Cell2DsId[i] = i;
 
         // Vertici della faccia (convertiti a unsigned int)
@@ -984,7 +984,7 @@ bool CostruisciDualMesh(const PolyhedronMesh& StartPolyhedron, PolyhedronMesh& D
 
         // Trova gli spigoli corrispondenti
         vector<unsigned int> edges;
-        for (size_t j = 0; j < nuove_facce[i].size(); ++j) {
+        for (size_t j = 0; j < nuove_facce[i].size(); j++) {
             int u = nuove_facce[i][j];
             int v = nuove_facce[i][(j + 1) % nuove_facce[i].size()];
             if (edge_map.count({u, v})) {
@@ -995,11 +995,8 @@ bool CostruisciDualMesh(const PolyhedronMesh& StartPolyhedron, PolyhedronMesh& D
                 cerr << "Errore: spigolo non trovato tra " << u << " e " << v << endl;
             }
         }
-
         DualPolyhedron.Cell2DsEdges[i] = edges;
     }
-
-    // Costruzione completata con successo
     return true;
 }
 
