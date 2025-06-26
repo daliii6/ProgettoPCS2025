@@ -6,11 +6,11 @@
 #include <array>
 #include "Utils.hpp"
 
-#include <Eigen/Dense> // necessario se non incluso in Utils.hpp
+#include <Eigen/Dense> 
 
 using namespace PolyhedronLibrary;
 
-const int b = 4;
+const unsigned int b = 4;
 
 // Calcola le proprietà teoriche attese di un solido geodetico di classe I
 // p, q: simbolo di Schläfli del solido platonico (usa solo q)
@@ -68,20 +68,17 @@ std::array<unsigned int, 3> ProprietàSolidiII(int q, int b) {
 
 
 // Calcola quanti vertici hanno un certo grado (numero di facce adiacenti)
-// ExpectedDegree: grado atteso del vertice
-// Vertices: ID dei vertici
-// Faces: elenco delle facce come liste di ID vertici
-int VertexDegree(int ExpectedDegree, const std::vector<unsigned int>& Vertices, const std::vector<std::vector<unsigned int>>& Faces){
-    int NumVertexOfExpectedDegree = 0;
-    for (const auto& idV : Vertices) {
-        int CurrentDegree = 0;
-        for (const auto& listF : Faces)
+int ValenzaVertici(int ValenzaAttesa, const std::vector<unsigned int>& Vertici, const std::vector<std::vector<unsigned int>>& Facce){
+    int VerticiAttesi = 0;
+    for (const auto& idV : Vertici) {
+        int Valenzavera = 0;
+        for (const auto& listF : Facce)
             if (std::find(listF.begin(), listF.end(), idV) != listF.end())
-                CurrentDegree++;
-        if (CurrentDegree == ExpectedDegree)
-            NumVertexOfExpectedDegree++;
+                Valenzavera++;
+        if (Valenzavera == ValenzaAttesa)
+            VerticiAttesi++;
     }
-    return NumVertexOfExpectedDegree;
+    return VerticiAttesi;
 }
 
 TEST(TestPolyhedron, TestClasseITetraedro)
@@ -101,8 +98,8 @@ TEST(TestPolyhedron, TestClasseITetraedro)
     EXPECT_EQ(expected, actual);
 
     unsigned int T = b * b;
-    EXPECT_EQ(VertexDegree(3, polyhedron.Cell0DsId, polyhedron.Cell2DsVertices), 4);
-    EXPECT_EQ(VertexDegree(6, polyhedron.Cell0DsId, polyhedron.Cell2DsVertices), 2 * (T - 1));
+    EXPECT_EQ(ValenzaVertici(3, polyhedron.Cell0DsId, polyhedron.Cell2DsVertices), 4);
+    EXPECT_EQ(ValenzaVertici(6, polyhedron.Cell0DsId, polyhedron.Cell2DsVertices), 2 * (T - 1));
 }
 
 TEST(TestPolyhedron, TestClasseIOttaedro)
@@ -122,8 +119,8 @@ TEST(TestPolyhedron, TestClasseIOttaedro)
     EXPECT_EQ(expected, actual);
 
     unsigned int T = b * b;
-    EXPECT_EQ(VertexDegree(4, polyhedron.Cell0DsId, polyhedron.Cell2DsVertices), 6);
-    EXPECT_EQ(VertexDegree(6, polyhedron.Cell0DsId, polyhedron.Cell2DsVertices), 4 * (T - 1));
+    EXPECT_EQ(ValenzaVertici(4, polyhedron.Cell0DsId, polyhedron.Cell2DsVertices), 6);
+    EXPECT_EQ(ValenzaVertici(6, polyhedron.Cell0DsId, polyhedron.Cell2DsVertices), 4 * (T - 1));
 }
 
 TEST(TestPolyhedron, TestClasseIITetraedro)
@@ -195,10 +192,10 @@ TEST(TestDualPolyhedron, TestClasseIDualeTetraedro)
     int T = b * b;
 
     int ExpectedVertices = 4 * T;      // Una faccia della mesh originale diventa un vertice nel duale
-    int ExpectedFaces = 2 * T + 2;     // Ogni vertice della mesh originale diventa una faccia nel duale
+    int ExpectedFacce = 2 * T + 2;     // Ogni vertice della mesh originale diventa una faccia nel duale
 
     EXPECT_EQ(DualPolyhedron.NumCell0Ds, ExpectedVertices);
-    EXPECT_EQ(DualPolyhedron.NumCell2Ds, ExpectedFaces);
+    EXPECT_EQ(DualPolyhedron.NumCell2Ds, ExpectedFacce);
 }
 
 
@@ -218,10 +215,10 @@ TEST(TestDualPolyhedron, TestClasseIIDualeTetraedro)
     std::array<unsigned int, 3> expected = ProprietàSolidiII(3, b); // Tetraedro: {p=3, q=3}
 
     int ExpectedVertices = expected[2]; // Le facce originali diventano vertici del duale
-    int ExpectedFaces = expected[0];    // I vertici originali diventano facce del duale
+    int ExpectedFacce = expected[0];    // I vertici originali diventano facce del duale
 
     EXPECT_EQ(DualPolyhedron.NumCell0Ds, ExpectedVertices);
-    EXPECT_EQ(DualPolyhedron.NumCell2Ds, ExpectedFaces);
+    EXPECT_EQ(DualPolyhedron.NumCell2Ds, ExpectedFacce);
 }
 
 TEST(TestOrdinaFacce, OrdinaFacceAttornoVertice_Ottaedro)
@@ -247,7 +244,7 @@ TEST(TestOrdinaFacce, OrdinaFacceAttornoVertice_Ottaedro)
     }
 
     // Verifica che ogni faccia sia adiacente alla successiva (2 vertici in comune)
-    for (size_t i = 0; i + 1 < facce_ordinate.size(); ++i) {
+    for (size_t i = 0; i + 1 < facce_ordinate.size(); i++) {
         const auto& f1 = polyhedron.Cell2DsVertices[facce_ordinate[i]];
         const auto& f2 = polyhedron.Cell2DsVertices[facce_ordinate[i+1]];
         int count_comuni = 0;
