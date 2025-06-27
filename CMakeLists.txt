@@ -10,35 +10,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # IMPOSE WARNINGS ON DEBUG
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -pedantic-errors")
-# Specifica la versione minima di CMake richiesta per questo progetto. Se l’utente ha una versione più vecchia, CMake interrompe la configurazione con un errore
-cmake_minimum_required(VERSION 3.9)
-
-# Definisce il nome del progetto (Project), i linguaggi usati (C++ e C) e la versione del progetto (1.0.0).
-project(Project LANGUAGES CXX C VERSION 1.0.0)
-
-
-################################################################################
-# Set C++ Standard: imposta lo standard C++ da usare a C++20, e forza l'uso di quello standard (non versioni precedenti)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-cmake_minimum_required(VERSION 3.9)
-
-project(Project LANGUAGES CXX C VERSION 1.0.0)
-
-# Set C++ Standard
-################################################################################
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# Quando si compila in modalità Debug, abilita una serie di warning e controlli molto severi:
-# -Wall: attiva molti warning utili.
-# -Wextra: attiva ancora più warning.
-# -pedantic-errors: segnala errori se il codice non è conforme allo standard.
-
-# IMPOSE WARNINGS ON DEBUG
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -pedantic-errors")
 
 #Su Windows, aggiunge un flag (-Wa,-mbig-obj) necessario quando si compila un file con molti simboli (come quelli generati da librerie template pesanti tipo Eigen).
 # IMPOSE CXX FLAGS FOR WINDOWS
