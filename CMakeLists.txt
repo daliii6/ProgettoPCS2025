@@ -1,3 +1,23 @@
+cmake_minimum_required(VERSION 3.9)
+
+project(Project LANGUAGES CXX C VERSION 1.0.0)
+
+# Set C++ Standard
+################################################################################
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+cmake_minimum_required(VERSION 3.9)
+
+project(Project LANGUAGES CXX C VERSION 1.0.0)
+
+# Set C++ Standard
+################################################################################
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# IMPOSE WARNINGS ON DEBUG
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -pedantic-errors")
 # Specifica la versione minima di CMake richiesta per questo progetto. Se l’utente ha una versione più vecchia, CMake interrompe la configurazione con un errore
 cmake_minimum_required(VERSION 3.9)
 
